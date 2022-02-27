@@ -8,18 +8,20 @@ import os
 
 URL_LIST = config('URL_LIST', cast=Csv())
 
-spanish_month_names = ["enero",
-                        "febrero",
-                        "marzo",
-                        "abril",
-                        "mayo",
-                        "junio",
-                        "julio",
-                        "agosto",
-                        "septiembre",
-                        "octubre",
-                        "noviembre",
-                        "diciembre"]
+spanish_month_names = [
+    "enero",
+    "febrero",
+    "marzo",
+    "abril",
+    "mayo",
+    "junio",
+    "julio",
+    "agosto",
+    "septiembre",
+    "octubre",
+    "noviembre",
+    "diciembre"
+]
 
 #Descarga archivos de la lista de URLs
 def download_csv_files(URL_LIST, month_names):
@@ -36,7 +38,6 @@ def download_csv_files(URL_LIST, month_names):
         full_path = os.path.join(category_path, f"{str(actual_year)}-{month_names[actual_date.month-1]}", '')
 
         if "csv" in file_ext: #Descargar archivo y crear directorio si la extensión del archivo es CSV
-
             # Comprobar si ya existe un .csv dentro de la categoría
             if helpers.find_csv_in_directory(category, category_path):
                 shutil.rmtree(category_path) #Eliminar la carpeta principal de la categoría

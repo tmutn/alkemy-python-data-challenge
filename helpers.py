@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 
 #Obtener la lista de carpetas en un directorio, sin recursión
 def find_folders_in_directory(target_directory):
@@ -6,7 +7,7 @@ def find_folders_in_directory(target_directory):
     directories = [item for item in dir_contents if os.path.isdir(item)]
     return directories
 
-#Buscar todos los .csv dentro de una carpeta
+#Buscar todos los .csv dentro de la lista de carpetas
 def find_csv_in_directory(categoria, directory):
     csv_list = []
     for root, dirs, files in os.walk(directory):
@@ -20,7 +21,8 @@ def get_category_filepath_dict(list_of_categories, directory):
     category_filepath = {}
     for category in list_of_categories:
         file_path = find_csv_in_directory(category, directory)
-        category_filepath[f"{category}"] = file_path
+        if file_path: #Solo agregar directorios que tengan un .csv
+            category_filepath[f"{category}"] = file_path
     return category_filepath
 
 def drop_columns(df, to_drop):
@@ -30,4 +32,14 @@ def drop_columns(df, to_drop):
         except KeyError as key_error:
             pass
             # print(f"{key_error}, skipping column drop")
+    return df
+
+def procesar_df(filepath, to_drop=None, df_cols=None):
+    df = pd.read_csv(filepath[0], encoding='utf-8') #Leer fuente  
+    #Eliminar columnas innecesarias de la fuente
+    if to_drop:
+        df = helpers.drop_columns(df, to_drop)
+    #Normalizar las columnas con los nombres utilizados en la base de datos
+    if df_cols:
+        df.columns = df_cols
     return df

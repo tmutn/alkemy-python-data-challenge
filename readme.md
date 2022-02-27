@@ -1,5 +1,9 @@
 Se asume que...
 
+Solo habrá archivos .csv de fuentes válidas dentro de los subdirectorios del proyecto para no interferir con la función de búsqueda.
+
+
+
 El código de área no importa para el número de teléfono
 El teléfono debe ser de tipo VARCHAR en la base de datos ya que muchos teléfonos incluyen el término INT para denotar el interno
 Las únicas carpetas en la estructura del código son las que albergan en algún lugar de su estructura un archivo csv

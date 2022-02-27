@@ -12,11 +12,15 @@ DB_NAME = config('DB_NAME')
 
 #Crear string de conexión
 db_string = f'{DB_TYPE}://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
-engine = create_engine(db_string)
+engine = create_engine(db_string, encoding='utf-8')
 
 #Ejecutar archivo DDL (si las tablas no existen)
-with engine.connect() as con:
-    file = open("create_tables.sql")
-    query = text(file.read())
-    con.execute(query)
-    con.close
+
+try:
+    with engine.connect() as con:
+        file = open("create_tables.sql")
+        query = text(file.read())
+        con.execute(query)
+        con.close
+except Exception as err:
+    print(err)

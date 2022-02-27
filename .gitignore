@@ -132,3 +132,10 @@ dmypy.json
 biblioteca_popular/
 cine/
 museo/
+Scripts/
+Lib/
+Include/
+env/
+__pycache__
+*.csv
+pyvenv.cfg
