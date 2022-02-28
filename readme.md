@@ -51,3 +51,4 @@ En este apartado dejo una lista de asunciones que se tomaron a la hora de progra
 * Para los números de teléfono, solo importa lo que está dentro de la columa número_de_teléfono, dejando de lado el código de área
 * El proyecto solo está configurado para aceptar las tres fuentes que indica el enunciado, debido a los nombres de las columnas que están hardcodeados
 * Se deben corregir ciertos errores de los datos para su correcto procesamiento, por ejemplo nombres de provincias mal cargados, o la misma provincia con dos nombres distintos
+* La base de datos es local y postgresql
