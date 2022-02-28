@@ -27,7 +27,7 @@ Adicionalmente está el archivo **helpers.py** que tiene funciones auxiliares
 ## Instrucciones de instalación ##
 
 1. Descargar el proyecto
-2. Crear un entorno virtual con la consola utilizando [venv](https://docs.python.org/3/library/venv.html) en la ubicación del proyecto utilizando:
+2. Crear un entorno virtual con la consola usando [venv](https://docs.python.org/3/library/venv.html) en la ubicación del proyecto utilizando el comando:
     * ``` python3 -m venv /path/to/new/virtual/environment ```
 3. Activar el entorno dependiendo de tu sistema operativo:
     * Activar el entorno virtual en Linux: ```$ source <venv>/bin/activate```
@@ -36,7 +36,7 @@ Adicionalmente está el archivo **helpers.py** que tiene funciones auxiliares
     * ```pip install -r requirements.txt``` 
 5. En el archivo .env ubicado en el directorio del proyecto, configurar usuario, contraseña y nombre de tu base de datos local postgresql
 6. Ejecutar el archivo normalizar_archivos.py
-    * ````python normalizar_archivos.py```
+    * ```python normalizar_archivos.py```
   
         
         
