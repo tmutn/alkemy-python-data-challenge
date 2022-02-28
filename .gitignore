@@ -139,3 +139,4 @@ env/
 __pycache__
 *.csv
 pyvenv.cfg
+bin/
