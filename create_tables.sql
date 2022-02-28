@@ -15,7 +15,7 @@ CREATE TABLE info_normalizada (
 	numero_de_telefono TEXT,
 	mail TEXT, 
     web TEXT,
-    fecha_actualizacion TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    fecha_de_carga TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE info_registros (
@@ -23,7 +23,7 @@ CREATE TABLE info_registros (
     provincia TEXT,
     cantidad_total INT,
 	fuente	TEXT,
-    fecha_actualizacion TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    fecha_de_carga TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE info_cines (
@@ -31,5 +31,5 @@ CREATE TABLE info_cines (
 	cant_pantallas INT,
 	cant_butacas INT,
 	espacios_incaa TEXT,
-	fecha_actualizacion TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+	fecha_de_carga TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );

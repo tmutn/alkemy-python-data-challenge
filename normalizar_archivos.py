@@ -1,18 +1,69 @@
+from xml.etree.ElementInclude import include
+import datetime as dt
 from decouple import config
-import helpers
 import pandas as pd
 import os
-from sqlalchemy import create_engine  
+import sqlalchemy.exc
 
-#Obtener variables de entorno
-DB_TYPE = config('DB_TYPE', default = "postgresql")
-DB_HOST = config('DB_HOST', default = "localhost")
-DB_USER = config('DB_USER')
-DB_PASS = config('DB_PASS')
-DB_NAME = config('DB_NAME')
-#Crear string de conexión
-db_string = f'{DB_TYPE}://{DB_USER}:{DB_PASS}@{DB_HOST}/{DB_NAME}'
-engine = create_engine(db_string, encoding='utf-8')
+#Módulos custom
+import init_sql
+import helpers
+import descargar_archivos
+
+#Obtener engine
+engine = init_sql.get_engine()
+#Generar tablas
+init_sql.create_tables_from_script(engine)
+
+#Descargar archivos
+descargar_archivos.download_csv_files()
+#Obtener el directorio root de este script
+root_dir = os.path.dirname(os.path.abspath(__file__))
+#Obtener la lista de categorias (buscando carpetas en el root_dir)
+list_of_categories = helpers.find_folders_in_directory(root_dir)
+#Obtener dict categoria : filepath para los csv encontrados en subdirectorios
+category_filepath = helpers.get_category_filepath_dict(list_of_categories, root_dir)
+
+#Excepción en caso de no haber archivos .csv
+if category_filepath:
+    pass
+else:
+    raise Exception("No hay archivos .csv descargados. Compruebe las urls en el archivo .env")
+
+#Registros por fuente (para el punto 2)
+dict_records_per_source = {}
+
+#Cargar csv, eliminar columnas (opcional), asignar columnas nuevas (opcional)
+def procesar_df(filepath, to_drop=None, df_cols=None):
+    df = pd.read_csv(filepath[0], encoding='utf-8') #Leer fuente  
+    if to_drop:
+        df = helpers.drop_columns(df, to_drop)
+    if df_cols:
+        df.columns = df_cols
+    return df
+
+#Agregar fecha de actualizacion a un df
+def add_datetime_col(df, colname='fecha_de_carga'):
+    df[colname] = pd.Series([dt.datetime.now()] * len(df))
+    return df
+
+
+###############PUNTO 1###############
+# Normalizar toda la información de Museos, Salas de Cine y Bibliotecas
+# Populares, para crear una única tabla que contenga:
+#   o cod_localidad
+#   o id_provincia
+#   o id_departamento
+#   o categoría
+#   o provincia
+#   o localidad
+#   o nombre
+#   o domicilio
+#   o código postal
+#   o número de teléfono
+#   o mail
+#   o web
+#####################################
 
 #Columnas innecesarias para generar csv_normalizado
 to_drop_punto1 = [
@@ -60,48 +111,6 @@ db_cols_normalizado = [
     'web'
 ]
 
-#Obtener el directorio root de este script
-root_dir = os.path.dirname(os.path.abspath(__file__))
-
-#Obtener la lista de categorias (buscando carpetas en el root_dir)
-list_of_categories = helpers.find_folders_in_directory(root_dir)
-
-#Obtener dict categoria : filepath para los csv encontrados en subdirectorios
-category_filepath = helpers.get_category_filepath_dict(list_of_categories, root_dir)
-
-#Registros por fuente (para el punto 2)
-dict_records_per_source = {}
-
-#Cargar csv, eliminar columnas (opcional), asignar columnas nuevas (opcional)
-def procesar_df(filepath, to_drop=None, df_cols=None):
-    df = pd.read_csv(filepath[0], encoding='utf-8') #Leer fuente  
-    #Eliminar columnas innecesarias de la fuente
-    if to_drop:
-        df = helpers.drop_columns(df, to_drop)
-    #Normalizar las columnas con los nombres utilizados en la base de datos
-    if df_cols:
-        df.columns = df_cols
-    return df
-
-
-###############PUNTO 1###############
-# Normalizar toda la información de Museos, Salas de Cine y Bibliotecas
-# Populares, para crear una única tabla que contenga:
-#   o cod_localidad
-#   o id_provincia
-#   o id_departamento
-#   o categoría
-#   o provincia
-#   o localidad
-#   o nombre
-#   o domicilio
-#   o código postal
-#   o número de teléfono
-#   o mail
-#   o web
-#####################################
-
-
 list_of_dfs = []
 #Normalizar todos los cv y después unirlos en uno solo
 for category, filepath in category_filepath.items():
@@ -110,8 +119,12 @@ for category, filepath in category_filepath.items():
     list_of_dfs.append(df_to_concat)   
 normalized_df = pd.concat(list_of_dfs, ignore_index=True)
 
+#Agregar columna 'fecha_de_carga'
+normalized_df = add_datetime_col(normalized_df)
+
 #Volcar dataframe final del PUNTO 1 a la base de datos
 normalized_df.to_sql(name='info_normalizada', con=engine, if_exists='replace', index=False)
+
 
 
 ###############PUNTO 2###############
@@ -184,7 +197,7 @@ columns = [
     'categoria', 
     'provincia',
     'cantidad_total',
-    'fuente',
+    'fuente'
 ]
 
 #Crear dataframes, agregarlos a una lista y concatenar
@@ -194,9 +207,11 @@ df_provincia_categoria = pd.DataFrame(columns=columns, data=provincia_categoria)
 lista_dfs = [df_records_per_source, df_records_per_category, df_provincia_categoria]
 df_cantidades = pd.concat(lista_dfs, ignore_index=True)
 
+#Agregar columna 'fecha_de_carga'
+df_cantidades = add_datetime_col(df_cantidades)
+
 #Volcar dataframe final del PUNTO 2 a la base de datos
 df_cantidades.to_sql(name='info_registros', con=engine, if_exists='replace', index=False)
-
 
 ###############PUNTO 3###############
 # ● Procesar la información de cines para poder crear una tabla que contenga:
@@ -246,6 +261,9 @@ dir_csv_cine = helpers.find_csv_in_directory('cine', root_dir)
 
 #Procesar df de cines
 df_cines = procesar_df(dir_csv_cine, to_drop_punto3, db_cols_cine)
+
+#Agregar columna fecha_de_carga
+df_cines = add_datetime_col(df_cines)
 
 #Volcar dataframe final del PUNTO 3 a la base de datos
 df_cines.to_sql(name='info_cines', con=engine, if_exists='replace', index=False)

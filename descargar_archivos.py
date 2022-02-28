@@ -1,10 +1,12 @@
 import datetime
 from decouple import config, Csv
-import helpers
 import requests
 import re
 import shutil
 import os
+
+#Módulos custom
+import helpers
 
 URL_LIST = config('URL_LIST', cast=Csv())
 
@@ -24,7 +26,7 @@ spanish_month_names = [
 ]
 
 #Descarga archivos de la lista de URLs
-def download_csv_files(URL_LIST, month_names):
+def download_csv_files(URL_LIST=URL_LIST, month_names=spanish_month_names):
     actual_date = datetime.datetime.now()
     actual_day = actual_date.day
     actual_month = actual_date.month
@@ -40,11 +42,11 @@ def download_csv_files(URL_LIST, month_names):
         if "csv" in file_ext: #Descargar archivo y crear directorio si la extensión del archivo es CSV
             # Comprobar si ya existe un .csv dentro de la categoría
             if helpers.find_csv_in_directory(category, category_path):
-                shutil.rmtree(category_path) #Eliminar la carpeta principal de la categoría
+                shutil.rmtree(category_path) #Eliminar la carpeta principal de la categoría para reemplazar
 
             # Crear directorios y descargar el archivos
             os.makedirs(os.path.dirname(full_path), exist_ok=True)             
             composite_filename = f'{category}-{actual_day}-{actual_month}-{actual_year}.{file_ext}'
             open(f'{os.path.join(full_path, composite_filename)}', 'wb').write(r.content)
 
-download_csv_files(URL_LIST, spanish_month_names)
+download_csv_files()

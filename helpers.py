@@ -33,13 +33,3 @@ def drop_columns(df, to_drop):
             pass
             # print(f"{key_error}, skipping column drop")
     return df
-
-def procesar_df(filepath, to_drop=None, df_cols=None):
-    df = pd.read_csv(filepath[0], encoding='utf-8') #Leer fuente  
-    #Eliminar columnas innecesarias de la fuente
-    if to_drop:
-        df = helpers.drop_columns(df, to_drop)
-    #Normalizar las columnas con los nombres utilizados en la base de datos
-    if df_cols:
-        df.columns = df_cols
-    return df
