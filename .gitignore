@@ -140,3 +140,5 @@ __pycache__
 *.csv
 pyvenv.cfg
 bin/
+include/
+lib64/
